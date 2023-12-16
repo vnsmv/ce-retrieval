@@ -732,7 +732,7 @@ class BiEncoderWrapper(LightningModule):
 			
 	def on_train_batch_end(self, outputs, batch, batch_idx, unused=0):
 		
-		super(BiEncoderWrapper, self).on_train_batch_end(outputs=outputs, batch=batch, batch_idx=batch_idx, unused=unused)
+		super(BiEncoderWrapper, self).on_train_batch_end(outputs=outputs, batch=batch, batch_idx=batch_idx)
 		
 		if (self.global_step + 1) % (self.config.print_interval * self.config.grad_acc_steps) == 0:
 			self.log("train_loss", outputs, on_epoch=True, logger=True)
