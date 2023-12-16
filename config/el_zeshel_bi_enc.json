@@ -86,7 +86,7 @@
   "pooling_type": "cls",
   "loss_type": "ce",
 
-  "train_batch_size": 8,
+  "train_batch_size": 4,
   "grad_acc_steps": 4,
   "eval_interval": 1000,
 
