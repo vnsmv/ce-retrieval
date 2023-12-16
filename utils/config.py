@@ -86,7 +86,7 @@ class Config(BaseConfig):
 		self.config_name 	= filename
 		
 		self.save_code		= True
-		self.base_res_dir	= "../../results"
+		self.base_res_dir	= "./results"
 		self.exp_id			= ""
 		self.res_dir_prefix	= "" # Prefix to add to result dir name
 		self.misc			= ""

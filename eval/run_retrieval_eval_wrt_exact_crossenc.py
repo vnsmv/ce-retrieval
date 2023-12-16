@@ -512,7 +512,7 @@ def plot(res_dir, method_vals):
 
 def main():
 	
-	data_dir = "../../data/zeshel"
+	data_dir = "./data/zeshel"
 	worlds = get_zeshel_world_info()
 	
 	parser = argparse.ArgumentParser( description='Run eval for various retrieval methods wrt exact crossencoder scores. This evaluation does not use ground-truth entity information into account')

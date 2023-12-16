@@ -178,7 +178,7 @@ class BasePairwiseTrainer(object):
 		
 		# wandb initialization
 		config_dict = self.config.__dict__
-		config_dict["CUDA_DEVICE"] = os.environ["CUDA_VISIBLE_DEVICES"]
+		config_dict["CUDA_DEVICE"] =  '1'#os.environ["CUDA_VISIBLE_DEVICES"]
 		
 		self.wandb_logger = WandbLogger(project=f"{self.config.exp_id}", dir=self.config.result_dir, config=config_dict)
 		try:
