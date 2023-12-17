@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from eval.eval_utils import compute_label_embeddings, compute_input_embeddings, compute_overlap
-from eval.matrix_approx_zeshel import CURApprox, plot_heat_map
+from eval.matrix_approx_zeshel import CURApprox, plot_heat_map, SVDApprox
 from models.biencoder import BiEncoderWrapper
 from models.crossencoder import CrossEncoderWrapper
 from utils.zeshel_utils import get_dataset_info, get_zeshel_world_info, N_ENTS_ZESHEL as NUM_ENTS
@@ -85,6 +85,9 @@ def run_approx_eval_w_seed(approx_method, all_ment_to_ent_scores, n_ment_anchors
 		elif approx_method == "cur_oracle":
 			# approx = CURApprox(row_idxs=row_idxs, col_idxs=col_idxs, rows=rows, cols=cols, approx_preference="rows", A = all_ment_to_ent_scores)
 			approx = CURApprox(row_idxs=row_idxs, col_idxs=col_idxs, rows=rows, cols=cols, approx_preference="rows", A=all_ment_to_ent_scores)
+			approx_ment_to_ent_scores = approx.get(list(range(n_ments)), list(range(n_ents)))
+		elif approx_method == "svd":
+			approx = SVDApprox(A=all_ment_to_ent_scores, approx_preference="rows")
 			approx_ment_to_ent_scores = approx.get(list(range(n_ments)), list(range(n_ents)))
 		else:
 			raise NotImplementedError(f"approx_method = {approx_method} not supported")
@@ -220,9 +223,9 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 		total_n_ment, total_n_ent = crossenc_ment_to_ent_scores.shape
 		
 		
-		
+
 		# For plots
-		eval_methods  = ["cur", "cur_oracle"]
+		eval_methods  = ["cur", "cur_oracle", 'svd']
 
 		n_ment_anchors_vals = [50, 100, 200, 500, 1000, 2000, 5000]
 		# n_ment_anchors_vals = [50, 100, 200]
