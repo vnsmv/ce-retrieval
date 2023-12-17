@@ -135,5 +135,5 @@ dmypy.json
 
 # data and resutls
 data
-results
 wandb
+results/wandb
