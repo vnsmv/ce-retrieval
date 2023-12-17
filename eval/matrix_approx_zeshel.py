@@ -181,3 +181,80 @@ def plot_heat_map(val_matrix, row_vals, col_vals, metric, top_k, curr_res_dir, t
 	except Exception as e:
 		embed()
 		raise e
+
+
+class SVDApprox(object):
+
+	def __init__(self, A, approx_preference):
+		super(SVDApprox, self).__init__()
+		# M :(n x m) = SVD : (n x kc) X (kc x kr) X (kr x m)
+
+		U, sigma, V = torch.svd(A)
+
+		if approx_preference == 'rows':
+			self.latent_cols = U
+			self.latent_rows = torch.matmul(torch.diag_embed(sigma), V.mT)
+		elif approx_preference == 'cols':
+			self.latent_cols = torch.matmul(U, torch.diag_embed(self.sigma))
+			self.latent_rows = V.mT
+		else:
+			NotImplementedError('no approx preference of that type {}' % approx_preference)
+
+
+	def get_rows(self, row_idxs):
+
+		# len(row_idxs) x m) =  (len(row_idxs) x kr) X ( kr, m))
+		ans = self.latent_rows[row_idxs,:] @ self.latent_cols
+		return ans
+
+
+	def get_cols(self, col_idxs):
+		# n x len(col_idxs) =  (n x kr) X (kr, len(col_idxs))
+		ans = self.latent_rows @ self.latent_cols[:, col_idxs]
+		return ans
+
+	def get(self, row_idxs, col_idxs):
+
+		# len(row_idxs) x len(col_idxs) =  (len(row_idxs) x kr) X ( kr, len(col_idxs))
+		ans = self.latent_rows[row_idxs,:] @ self.latent_cols[:, col_idxs]
+		return ans
+
+	def get_complete_col(self, sparse_cols):
+		"""
+		Take values in cols corresponding to anchor row indices and return complete cols
+		:param sparse_cols:
+		:return:
+		"""
+		if self.approx_preference != "cols":
+			raise NotImplementedError("This is not designed to give good approx of cols as U matrix is multiplied w/ R matrix. Build index w/ approx_preference = cols instead.")
+		# (n x *) = (n x kr) X (kr x *)
+		dense_cols = self.latent_rows @ sparse_cols
+		return dense_cols
+
+	def topk_in_col(self, sparse_cols, k):
+		"""
+		Return top-k indices in these col(s)
+		:return:
+		"""
+
+		return torch.topk(self.get_complete_col(sparse_cols=sparse_cols), k, dim=1)
+
+
+	def get_complete_row(self, sparse_rows):
+		"""
+		Take values in rows corresponding to anchor col indices and return complete rows
+		:param sparse_cols:
+		:return:
+		"""
+		if self.approx_preference != "rows":
+			raise NotImplementedError("This is not designed to give good approx of rows as C and U matrix are multiplied together. Build index w/ approx_preference = rows instead.")
+		# (* x m) = (* x kr) X (kr x m)
+		dense_rows = sparse_rows @ self.latent_cols
+		return dense_rows
+
+	def topk_in_row(self, sparse_rows, k):
+		"""
+		Return top-k indices in these row(s)
+		:return:
+		"""
+		return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)
