@@ -225,7 +225,7 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 		
 
 		# For plots
-		eval_methods  = ["cur", "cur_oracle", 'svd']
+		eval_methods  = ["bienc", "cur", "cur_oracle", "svd"]
 
 		n_ment_anchors_vals = [50, 100, 200, 500, 1000, 2000, 5000]
 		# n_ment_anchors_vals = [50, 100, 200]
@@ -481,14 +481,17 @@ def plot(res_dir, method_vals):
 					# curr_config_res = [eval_res[f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}~k={top_k}"][mtype][metric] for n_ent_anchors in n_ent_anchors_vals]
 					y_vals["cur"] += [eval_res["cur"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
 					y_vals["bienc"] += [eval_res["bienc"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
+					y_vals["svd"] += [eval_res["svd"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
 				
 					x_vals["cur"] += [top_k_retvr + n_ent_anchors]
 					x_vals["bienc"] += [top_k_retvr]
+					x_vals["svd"] += [top_k_retvr + n_ent_anchors]
 					
 				
-				plt.scatter(x_vals["bienc"], y_vals["cur"], c=colors[2][1], label="cur-wo-anc-cost", alpha=0.5,edgecolors=colors[2][0])
+				# plt.scatter(x_vals["bienc"], y_vals["cur"], c=colors[2][1], label="cur-wo-anc-cost", alpha=0.5,edgecolors=colors[2][0])
 				plt.scatter(x_vals["cur"], y_vals["cur"], c=colors[1][1], label="cur", alpha=0.5,edgecolors=colors[1][0])
 				plt.scatter(x_vals["bienc"], y_vals["bienc"], c=colors[0][1], label="bienc", alpha=0.5, edgecolors=colors[0][0])
+				plt.scatter(x_vals["svd"], y_vals["svd"], c=colors[2][1], label="svd", alpha=0.5, edgecolors=colors[2][0])
 				
 				plt.xlim(1, 1100)
 				plt.legend()

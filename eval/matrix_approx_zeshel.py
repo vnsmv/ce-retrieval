@@ -190,7 +190,7 @@ class SVDApprox(object):
 		# M :(n x m) = SVD : (n x kc) X (kc x kr) X (kr x m)
 
 		self.m = A.shape[1]
-		self.truncate = 0.5
+		self.truncate = 0.2
 		self.coef = int(self.m * self.truncate)
 
 		U, sigma, V = torch.svd(A)
