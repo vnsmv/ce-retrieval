@@ -21,6 +21,7 @@ from models.biencoder import BiEncoderWrapper
 from models.crossencoder import CrossEncoderWrapper
 from utils.zeshel_utils import get_dataset_info, get_zeshel_world_info, N_ENTS_ZESHEL as NUM_ENTS
 
+import time
 
 logging.basicConfig(
 	stream=sys.stderr,
@@ -76,6 +77,7 @@ def run_approx_eval_w_seed(approx_method, all_ment_to_ent_scores, n_ment_anchors
 		non_anchor_ment_idxs = sorted(list(set(list(range(n_ments))) - set(anchor_ment_idxs)))
 		non_anchor_ent_idxs = sorted(list(set(list(range(n_ents))) - set(anchor_ent_idxs)))
 	
+		start_time = time.time()
 		if approx_method in ["bienc","fixed_anc_ent"] or approx_method.startswith("fixed_anc_ent_cur_"):
 			approx_ment_to_ent_scores = precomp_approx_ment_to_ent_scores
 		elif approx_method == "cur":
@@ -91,6 +93,7 @@ def run_approx_eval_w_seed(approx_method, all_ment_to_ent_scores, n_ment_anchors
 			approx_ment_to_ent_scores = approx.get(list(range(n_ments)), list(range(n_ents)))
 		else:
 			raise NotImplementedError(f"approx_method = {approx_method} not supported")
+		execution_time = time.time() - start_time
 		
 		topk_preds = []
 		approx_topk_preds = []
@@ -153,7 +156,8 @@ def run_approx_eval_w_seed(approx_method, all_ment_to_ent_scores, n_ment_anchors
 		final_res = {
 			"anchor":score_topk_preds_wrapper(arg_ment_idxs=anchor_ment_idxs),
 			"non_anchor":score_topk_preds_wrapper(arg_ment_idxs=non_anchor_ment_idxs),
-			"all":score_topk_preds_wrapper(arg_ment_idxs=list(range(n_ments)))
+			"all":score_topk_preds_wrapper(arg_ment_idxs=list(range(n_ments))), 
+			"time": {"time": execution_time}
 		}
 		return final_res
 	except Exception as e:
@@ -199,7 +203,7 @@ def run_approx_eval(approx_method, all_ment_to_ent_scores, precomp_approx_ment_t
 	for ment_type in avg_res:
 		for metric in avg_res[ment_type]:
 			new_avg_res[ment_type][metric] = np.mean(avg_res[ment_type][metric])
-	
+
 	return new_avg_res
 	
 
