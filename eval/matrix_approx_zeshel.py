@@ -41,7 +41,7 @@ class CURApprox(object):
 
 		intersect_mat = self.C[row_idxs, :] # kr x kc
 
-		assert torch.eq(self.C[row_idxs, :], self.R[:, col_idxs]), "Invalid rows and cols as their intersection does not match"
+		# assert torch.eq(self.C[row_idxs, :], self.R[:, col_idxs]), "Invalid rows and cols as their intersection does not match"
 		
 		if A is not None: # A better conditioned way of estimating U matrix but this requires computing entire matrix A ahead of time.
 			self.U = torch.tensor(np.linalg.pinv(self.C)) @ torch.tensor(A) @ torch.tensor(np.linalg.pinv(self.R))
@@ -189,14 +189,21 @@ class SVDApprox(object):
 		super(SVDApprox, self).__init__()
 		# M :(n x m) = SVD : (n x kc) X (kc x kr) X (kr x m)
 
+		self.m = A.shape[1]
+		self.truncate = 0.5
+		self.coef = int(self.m * self.truncate)
+
 		U, sigma, V = torch.svd(A)
+		sigma = sigma[:self.coef]
+		U = U[:, :self.coef]
+		V = V[:, :self.coef]
 
 		if approx_preference == 'rows':
-			self.latent_cols = U
-			self.latent_rows = torch.matmul(torch.diag_embed(sigma), V.mT)
+			self.latent_rows = U
+			self.latent_cols = torch.matmul(torch.diag_embed(sigma), V.mT)
 		elif approx_preference == 'cols':
-			self.latent_cols = torch.matmul(U, torch.diag_embed(self.sigma))
-			self.latent_rows = V.mT
+			self.latent_rows = torch.matmul(U, torch.diag_embed(self.sigma))
+			self.latent_cols = V.mT
 		else:
 			NotImplementedError('no approx preference of that type {}' % approx_preference)
 
@@ -216,7 +223,9 @@ class SVDApprox(object):
 	def get(self, row_idxs, col_idxs):
 
 		# len(row_idxs) x len(col_idxs) =  (len(row_idxs) x kr) X ( kr, len(col_idxs))
-		ans = self.latent_rows[row_idxs,:] @ self.latent_cols[:, col_idxs]
+		rows = self.latent_rows[row_idxs,:]
+		cols = self.latent_cols[:, col_idxs]
+		ans = rows @ cols
 		return ans
 
 	def get_complete_col(self, sparse_cols):

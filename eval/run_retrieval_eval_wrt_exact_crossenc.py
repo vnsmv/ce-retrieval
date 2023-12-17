@@ -288,6 +288,8 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
 				elif curr_method == "cur_oracle":
 					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
+				elif curr_method == "svd":
+					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
 				elif curr_method == "fixed_anc_ent":
 					
 					ment_to_ent_scores_wrt_anc_ents = {}
@@ -515,7 +517,7 @@ def plot(res_dir, method_vals):
 
 def main():
 	
-	data_dir = "../../data/zeshel"
+	data_dir = "./data/zeshel"
 	worlds = get_zeshel_world_info()
 	
 	parser = argparse.ArgumentParser( description='Run eval for various retrieval methods wrt exact crossencoder scores. This evaluation does not use ground-truth entity information into account')
