@@ -275,6 +275,7 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 				LOGGER.info(f"Running inference for method = {curr_method}")
 				precomp_approx_ment_to_ent_scores = {}
 				if curr_method  == "bienc":
+					start_time = time.time()
 					label_embeds = compute_label_embeddings(
 						biencoder=biencoder,
 						labels_tokens_list=complete_entity_tokens_list,
@@ -288,6 +289,8 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 					)
 					bienc_ment_to_ent_scores = mention_embeds @ label_embeds.T
 					precomp_approx_ment_to_ent_scores = {x:bienc_ment_to_ent_scores for x in n_ent_anchors_vals}
+
+					biencoder_time = time.time() - start_time
 				elif curr_method == "cur":
 					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
 				elif curr_method == "cur_oracle":
@@ -388,7 +391,10 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 						top_k_retvr=top_k_retvr,
 						n_seeds=n_seeds
 					)
-	
+
+					if curr_method == 'bienc':
+						curr_ans['time']['time'] = biencoder_time
+
 					eval_res[curr_method][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"] = curr_ans
 	
 		
