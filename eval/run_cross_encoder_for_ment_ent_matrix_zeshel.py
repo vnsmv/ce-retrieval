@@ -283,7 +283,7 @@ def run(crossencoder, data_fname, n_ment_start, n_ment, n_ent, mode,  batch_size
 
 def main():
 	exp_id = "4_Zeshel_Ment2Ent"
-	data_dir = "../../data/zeshel"
+	data_dir = "./data/zeshel"
 	
 	
 	worlds = get_zeshel_world_info()
