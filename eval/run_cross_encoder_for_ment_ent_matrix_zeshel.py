@@ -10,7 +10,7 @@ import numpy as np
 from IPython import embed
 from pathlib import Path
 import pickle
-
+import traceback
 import wandb
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -26,7 +26,6 @@ logging.basicConfig(
 	level=logging.INFO,
 )
 LOGGER = logging.getLogger(__name__)
-
 
 
 
@@ -75,6 +74,7 @@ def create_paired_dataset(encoded_mentions, encoded_entities, max_pair_length, b
 	except Exception as e:
 		embed()
 		raise e
+
 
 
 def _run_cross_encoder(cross_encoder, dataloader, max_ment_length, n_ment, n_ent, use_all_layers, log=True):
@@ -198,7 +198,7 @@ def run(crossencoder, data_fname, n_ment_start, n_ment, n_ent, mode,  batch_size
 		LOGGER.info(f"Running score computation with first {n_ent} entities!!!")
 		entity_id_list = np.arange(n_ent)
 		entity_tokens_list = complete_entity_tokens_list[entity_id_list]
-	
+ 
 		with torch.no_grad():
 			LOGGER.info(f"Computing score for each test entity with each mention. batch_size={batch_size}, n_ment={n_ment}, n_ent={n_ent}")
 			dataloader = create_paired_dataset(

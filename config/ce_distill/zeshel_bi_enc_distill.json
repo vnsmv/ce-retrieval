@@ -10,13 +10,13 @@
   "train_domains":["yugioh"],
   "dev_domains":["yugioh"],
 
-  "mention_file_template" : "../../data/zeshel/processed/all_worlds/{}_mentions.jsonl",
-  "entity_file_template" : "../../data/zeshel/documents/{}.json",
-  "entity_token_file_template" : "../../data/zeshel/tokenized_entities/{}_128_bert_base_uncased.npy",
+  "mention_file_template" : "/data/zeshel/processed/all_worlds/{}_mentions.jsonl",
+  "entity_file_template" : "/data/zeshel/documents/{}.json",
+  "entity_token_file_template" : "/data/zeshel/tokenized_entities/{}_128_bert_base_uncased.npy",
 
 
-  "train_ent_w_score_file_template" : "../../results/8_CUR_EMNLP/d=ent_link_ce/6_256_e_crossenc/score_mats_model-2-15999.0--79.46.ckpt/{}/m2e_splits/nm_train=100/split_idx=0/train_train.pkl",
-  "dev_ent_w_score_file_template"   : "../../results/8_CUR_EMNLP/d=ent_link_ce/6_256_e_crossenc/score_mats_model-2-15999.0--79.46.ckpt/{}/m2e_splits/nm_train=100/split_idx=0/train_dev.pkl",
+  "train_ent_w_score_file_template" : "/results/8_CUR_EMNLP/d=ent_link_ce/6_256_e_crossenc/score_mats_model-2-15999.0--79.46.ckpt/{}/m2e_splits/nm_train=100/split_idx=0/train_train.pkl",
+  "dev_ent_w_score_file_template"   : "/results/8_CUR_EMNLP/d=ent_link_ce/6_256_e_crossenc/score_mats_model-2-15999.0--79.46.ckpt/{}/m2e_splits/nm_train=100/split_idx=0/train_dev.pkl",
 
   "neg_strategy": "top_ce_match",
   "distill_n_labels": 4,
