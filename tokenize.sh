@@ -1,5 +1,6 @@
-# star_track
-export PYTHONPATH=/home/ansafronov/Yandex.Disk/Studies/NLA/ce-retrieval
+# star_trek
+export ROOT_DIR=`pwd`
+export PYTHONPATH=$ROOT_DIR:$PYTHONPATH
 export CUDA_VISIBLE_DEVICES=0
 
 python utils/tokenize_entities.py --ent_file data/zeshel/documents/star_trek.json --out_file data/zeshel/tokenized_entities/star_trek_128_bert_base_uncased.npy --bert_model_type bert-base-uncased --max_seq_len 128 --lowercase 0

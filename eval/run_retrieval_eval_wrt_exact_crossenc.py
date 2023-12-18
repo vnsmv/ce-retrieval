@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from eval.eval_utils import compute_label_embeddings, compute_input_embeddings, compute_overlap
-from eval.matrix_approx_zeshel import CURApprox, plot_heat_map, SVDApprox
+from eval.matrix_approx_zeshel import CURApprox, plot_heat_map, SVDApprox, QRApprox
 from models.biencoder import BiEncoderWrapper
 from models.crossencoder import CrossEncoderWrapper
 from utils.zeshel_utils import get_dataset_info, get_zeshel_world_info, N_ENTS_ZESHEL as NUM_ENTS
@@ -91,6 +91,9 @@ def run_approx_eval_w_seed(approx_method, all_ment_to_ent_scores, n_ment_anchors
 		elif approx_method == "svd":
 			approx = SVDApprox(A=all_ment_to_ent_scores, approx_preference="rows")
 			approx_ment_to_ent_scores = approx.get(list(range(n_ments)), list(range(n_ents)))
+		elif approx_method == "qr":
+			approx = SVDApprox(A=all_ment_to_ent_scores, approx_preference="rows")
+			approx_ment_to_ent_scores = approx.get(list(range(n_ments)), list(range(n_ents)))	
 		else:
 			raise NotImplementedError(f"approx_method = {approx_method} not supported")
 		execution_time = time.time() - start_time
@@ -229,7 +232,7 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 		
 
 		# For plots
-		eval_methods  = ["bienc", "cur", "cur_oracle", "svd"]
+		eval_methods  = ["bienc", "cur", "cur_oracle", "svd", "qr"]
 
 		n_ment_anchors_vals = [50, 100, 200, 500, 1000, 2000, 5000]
 		# n_ment_anchors_vals = [50, 100, 200]
@@ -297,6 +300,8 @@ def run(base_res_dir, data_info, n_seeds, batch_size, plot_only, misc, disable_w
 					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
 				elif curr_method == "svd":
 					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}
+				elif curr_method == "qr":
+					precomp_approx_ment_to_ent_scores = {x:None for x in n_ent_anchors_vals}	
 				elif curr_method == "fixed_anc_ent":
 					
 					ment_to_ent_scores_wrt_anc_ents = {}
@@ -492,16 +497,19 @@ def plot(res_dir, method_vals):
 					y_vals["cur"] += [eval_res["cur"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
 					y_vals["bienc"] += [eval_res["bienc"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
 					y_vals["svd"] += [eval_res["svd"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
+					y_vals["qr"] += [eval_res["qr"][f"top_k={top_k}"][f"k_retvr={top_k_retvr}"][f"anc_n_m={n_ment_anchors}~anc_n_e={n_ent_anchors}"][mtype][metric]]
 				
 					x_vals["cur"] += [top_k_retvr + n_ent_anchors]
 					x_vals["bienc"] += [top_k_retvr]
 					x_vals["svd"] += [top_k_retvr + n_ent_anchors]
+					x_vals["qr"] += [top_k_retvr + n_ent_anchors]
 					
 				
 				# plt.scatter(x_vals["bienc"], y_vals["cur"], c=colors[2][1], label="cur-wo-anc-cost", alpha=0.5,edgecolors=colors[2][0])
 				plt.scatter(x_vals["cur"], y_vals["cur"], c=colors[1][1], label="cur", alpha=0.5,edgecolors=colors[1][0])
 				plt.scatter(x_vals["bienc"], y_vals["bienc"], c=colors[0][1], label="bienc", alpha=0.5, edgecolors=colors[0][0])
 				plt.scatter(x_vals["svd"], y_vals["svd"], c=colors[2][1], label="svd", alpha=0.5, edgecolors=colors[2][0])
+				plt.scatter(x_vals["qr"], y_vals["qr"], c=colors[3][1], label="qr", alpha=0.5, edgecolors=colors[3][0])
 				
 				plt.xlim(1, 1100)
 				plt.legend()

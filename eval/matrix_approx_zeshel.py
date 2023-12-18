@@ -267,3 +267,101 @@ class SVDApprox(object):
 		:return:
 		"""
 		return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)
+
+
+class QRApprox(object):
+    def __init__(self, A, approx_preference):
+        """
+        Initialize the QR matrix approximation.
+        :param A: The original matrix to approximate.
+        :param approx_preference: Preference for approximation ('rows' or 'cols').
+        """
+        super(QRApprox, self).__init__()
+
+        self.m = A.shape[1]
+
+        Q, R = torch.qr(torch.tensor(A, dtype=torch.float64))
+        self.truncate = 0.2
+        self.coef = int(self.m * self.truncate)
+
+        Q = Q[:, :self.coef]
+        R = R[:self.coef, :]
+
+        if approx_preference == 'rows':
+            self.latent_rows = Q
+            self.latent_cols = R
+        elif approx_preference == 'cols':
+            self.latent_rows = torch.matmul(Q, torch.diag_embed(torch.diag(R)))
+            self.latent_cols = torch.eye(self.m)[:, :self.coef]
+        else:
+            raise NotImplementedError('No approx preference of type {} found'.format(approx_preference))
+
+    def get_rows(self, row_idxs):
+        """
+        Compute the approximation for specified row indices.
+        :param row_idxs: Row indices to approximate.
+        :return: Approximated rows.
+        """
+        ans = self.latent_rows[row_idxs, :] @ self.latent_cols
+        return ans
+
+    def get_cols(self, col_idxs):
+        """
+        Compute the approximation for specified column indices.
+        :param col_idxs: Column indices to approximate.
+        :return: Approximated columns.
+        """
+        ans = self.latent_rows @ self.latent_cols[:, col_idxs]
+        return ans
+
+    def get(self, row_idxs, col_idxs):
+        """
+        Compute the approximation for specified row and column indices.
+        :param row_idxs: Row indices to approximate.
+        :param col_idxs: Column indices to approximate.
+        :return: Approximated matrix section.
+        """
+        rows = self.latent_rows[row_idxs, :]
+        cols = self.latent_cols[:, col_idxs]
+        ans = rows @ cols
+        return ans
+
+    def get_complete_col(self, sparse_cols):
+        """
+        Compute complete columns from given sparse columns.
+        :param sparse_cols: Sparse columns.
+        :return: Complete columns.
+        """
+        if self.approx_preference != "cols":
+            raise NotImplementedError("Build index with approx_preference = 'cols' for this functionality.")
+        dense_cols = self.latent_rows @ sparse_cols
+        return dense_cols
+
+    def topk_in_col(self, sparse_cols, k):
+        """
+        Find top-k indices in the approximated columns.
+        :param sparse_cols: Sparse columns.
+        :param k: Number of top indices to find.
+        :return: Top-k indices.
+        """
+        return torch.topk(self.get_complete_col(sparse_cols=sparse_cols), k, dim=1)
+
+    def get_complete_row(self, sparse_rows):
+        """
+        Compute complete rows from given sparse rows.
+        :param sparse_rows: Sparse rows.
+        :return: Complete rows.
+        """
+        if self.approx_preference != "rows":
+            raise NotImplementedError("Build index with approx_preference = 'rows' for this functionality.")
+        dense_rows = sparse_rows @ self.latent_cols
+        return dense_rows
+
+    def topk_in_row(self, sparse_rows, k):
+        """
+        Find top-k indices in the approximated rows.
+        :param sparse_rows: Sparse rows.
+        :param k: Number of top indices to find.
+        :return: Top-k indices.
+        """
+        return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)		
