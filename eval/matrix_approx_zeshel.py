@@ -268,27 +268,28 @@ class SVDApprox(object):
 		"""
 		return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)
 
-class TruncatedSVDApprox(object):
-
+class TruncatedLU(object):
+	
 	def __init__(self, A, approx_preference):
 		super(SVDApprox, self).__init__()
 		# M :(n x m) = SVD : (n x kc) X (kc x kr) X (kr x m)
-
-		self.m = A.shape[1]
 		self.truncate = 0.2
 		self.coef = int(self.m * self.truncate)
-
-		U, sigma, V = torch.svd_lowrank(A,q=10,niter=2,M=None)
-		sigma = sigma[:self.coef]
-		U = U[:, :self.coef]
-		V = V[:, :self.coef]
-
+		self.m=A.shape[1]
+    		n= A.shape[0]
+   	 	Omega = np.random.randn(self.m, 2*self.coef)
+    		Y = A @ Omega
+    		Q, _ = np.linalg.qr(Y)
+    		B = Q.T @ A
+		U_tilde, S, Vt = svd(B, full_matrices=False)
+   	 	U = Q @ U_tilde
+		U, S, Vt = U[:, :rank], S[:rank], Vt[:rank, :]
 		if approx_preference == 'rows':
 			self.latent_rows = U
-			self.latent_cols = torch.matmul(torch.diag_embed(sigma), V.mT)
+			self.latent_cols = torch.matmul(torch.diag_embed(sigma), Vt)
 		elif approx_preference == 'cols':
 			self.latent_rows = torch.matmul(U, torch.diag_embed(self.sigma))
-			self.latent_cols = V.mT
+			self.latent_cols = Vt
 		else:
 			NotImplementedError('no approx preference of that type {}' % approx_preference)
 
@@ -351,7 +352,8 @@ class TruncatedSVDApprox(object):
 		Return top-k indices in these row(s)
 		:return:
 		"""
-		return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)class QRApprox(object):
+		return torch.topk(self.get_complete_row(sparse_rows=sparse_rows), k, dim=1)
+class QRApprox(object):
     def __init__(self, A, approx_preference):
         """
         Initialize the QR matrix approximation.
