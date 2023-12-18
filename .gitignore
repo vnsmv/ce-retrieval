@@ -137,3 +137,4 @@ dmypy.json
 data
 wandb
 results/wandb
+checkpoints
